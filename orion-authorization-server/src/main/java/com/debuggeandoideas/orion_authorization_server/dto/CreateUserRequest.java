@@ -12,6 +12,11 @@ public record CreateUserRequest(
 
         @NotBlank
         @Size(min = 8, max = 72)
+        /*@Pattern(
+                regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,72}$",
+                message = "must have 8 to 72 characters, with at least one uppercase letter, one digit and one special character"
+        )*/
+
         String password,
 
         String role) {
