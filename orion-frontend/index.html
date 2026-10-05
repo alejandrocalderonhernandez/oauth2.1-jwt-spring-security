@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Orión · Control de misión</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="stars" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#/news">
+      <span class="brand-ic"><i data-icon="orbit" data-size="26"></i></span>
+      <span class="brand-tx"><b>ORIÓN</b><small>Control de misión</small></span>
+    </a>
+
+    <nav id="nav" aria-label="Principal">
+      <a href="#/news" data-route="news"><i data-icon="newspaper"></i><span>Noticias</span></a>
+      <a href="#/missions" data-route="missions"><i data-icon="rocket"></i><span>Misiones</span><em class="req">USER</em></a>
+      <a href="#/missions/new" data-route="new"><i data-icon="file-plus-2"></i><span>Nueva misión</span><em class="req">ADMIN</em></a>
+    </nav>
+
+    <div class="topright">
+      <span id="modeBadge" class="mode"></span>
+      <div id="userArea"></div>
+      <button id="panelToggle" class="iconbtn" title="Mostrar u ocultar el panel de flujo" aria-label="Panel de flujo OAuth">
+        <i data-icon="panel-right"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <main id="main">
+      <div id="banner" role="status"></div>
+      <div id="view"></div>
+    </main>
+
+    <aside id="panel" class="panel" aria-label="Panel de flujo OAuth">
+      <div class="panel-head">
+        <div class="tabs" role="tablist">
+          <button data-tab="flow" role="tab">Flujo</button>
+          <button data-tab="requests" role="tab">Peticiones</button>
+          <button data-tab="token" role="tab">Token</button>
+        </div>
+        <button class="iconbtn small" data-act="close" aria-label="Cerrar panel"><i data-icon="x" data-size="16"></i></button>
+      </div>
+      <div id="panelBody" class="panel-body"></div>
+    </aside>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

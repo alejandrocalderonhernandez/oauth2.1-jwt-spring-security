@@ -1,0 +1,37 @@
+[
+  {
+    "id": "N-101",
+    "date": "2026-09-28",
+    "tag": "COMUNICADO",
+    "headline": "Orión confirma que todo marcha con normalidad",
+    "summary": "La base espacial Orión informa que sus sistemas funcionan al 100%. Nada que ver aquí. Circulen, por favor."
+  },
+  {
+    "id": "N-102",
+    "date": "2026-09-25",
+    "tag": "CIENCIA",
+    "headline": "Nuevo telescopio detecta 'ruido raro' en el espacio profundo",
+    "summary": "Los científicos aseguran que probablemente es una lavadora cósmica. Se investiga de todos modos, por si acaso."
+  },
+  {
+    "id": "N-103",
+    "date": "2026-09-21",
+    "tag": "TRIPULACIÓN",
+    "headline": "Cadetes de la generación 2026 terminan su entrenamiento",
+    "summary": "Treinta nuevos cadetes superaron la prueba de gravedad cero. Uno de ellos todavía no encuentra su zapato."
+  },
+  {
+    "id": "N-104",
+    "date": "2026-09-17",
+    "tag": "TECNOLOGÍA",
+    "headline": "El nuevo traje espacial incluye café integrado",
+    "summary": "Después de años de investigación, la agencia reconoce que sin café no hay misión que valga."
+  },
+  {
+    "id": "N-105",
+    "date": "2026-09-12",
+    "tag": "AVISO",
+    "headline": "Se recuerda al personal: las misiones clasificadas no se comentan en la cafetería",
+    "summary": "Se han detectado conversaciones sospechosas cerca de la máquina de café. Este es un recordatorio amistoso."
+  }
+]

@@ -1,0 +1,76 @@
+[
+  {
+    "id": "M-001",
+    "codename": "Luna Roja",
+    "destination": "Luna · cara oculta",
+    "status": "ACTIVA",
+    "classification": "ULTRA SECRETO",
+    "launchDate": "2026-03-14",
+    "summary": "Exploración geológica de un cráter inusualmente simétrico.",
+    "crew": [
+      { "name": "Cmdte. Elena Rojas", "specialty": "Comando" },
+      { "name": "Dr. Kenji Mora", "specialty": "Geología" },
+      { "name": "Ing. Sofía Brandt", "specialty": "Perforación" }
+    ],
+    "findings": [
+      "Estructura geométrica de 40 metros enterrada bajo el regolito",
+      "Cristales que emiten luz azul al calentarse"
+    ],
+    "classifiedNote": "Los cristales reaccionan al sonido. Se prohíbe reproducir música cerca del hallazgo."
+  },
+  {
+    "id": "M-002",
+    "codename": "Señal de Europa",
+    "destination": "Europa · luna de Júpiter",
+    "status": "EN ANÁLISIS",
+    "classification": "SECRETO",
+    "launchDate": "2025-11-02",
+    "summary": "Monitoreo de emisiones de radio bajo la capa de hielo.",
+    "crew": [
+      { "name": "Dra. Lucía Varela", "specialty": "Radioastronomía" },
+      { "name": "Téc. Omar Quintana", "specialty": "Comunicaciones" }
+    ],
+    "findings": [
+      "Señal repetitiva cada 7 minutos, siempre con el mismo patrón",
+      "El patrón coincide con una secuencia de números primos"
+    ],
+    "classifiedNote": "Alguien respondió la señal por error desde el laboratorio. Todavía esperamos que no se haya ofendido."
+  },
+  {
+    "id": "M-003",
+    "codename": "Cinturón Silencio",
+    "destination": "Cinturón de asteroides",
+    "status": "CONCLUIDA",
+    "classification": "CONFIDENCIAL",
+    "launchDate": "2024-06-21",
+    "summary": "Recolección de muestras de un asteroide de hierro.",
+    "crew": [
+      { "name": "Cmdte. Íñigo Salas", "specialty": "Comando" },
+      { "name": "Dra. Mei Tan", "specialty": "Mineralogía" },
+      { "name": "Ing. Rafael Duarte", "specialty": "Sistemas" }
+    ],
+    "findings": [
+      "Esfera metálica que no pesa nada pero no puede levantarse con las manos",
+      "Superficie sin ningún rasguño tras 4 mil millones de años"
+    ],
+    "classifiedNote": "La esfera apareció de vuelta en el contenedor después de enviarla al almacén. Dos veces."
+  },
+  {
+    "id": "M-004",
+    "codename": "Operación Eco",
+    "destination": "Órbita terrestre baja",
+    "status": "ACTIVA",
+    "classification": "ULTRA SECRETO",
+    "launchDate": "2026-08-05",
+    "summary": "Pruebas de comunicaciones con un satélite experimental.",
+    "crew": [
+      { "name": "Ing. Valeria Cruz", "specialty": "Órbita" },
+      { "name": "Téc. Bruno Hale", "specialty": "Telemetría" }
+    ],
+    "findings": [
+      "Un objeto no registrado devuelve nuestras transmisiones 3 segundos antes de enviarlas",
+      "El objeto no aparece en ningún radar, pero sí en las fotos"
+    ],
+    "classifiedNote": "Si lees esto sin autorización, el objeto ya sabe que lo sabes. Es broma. Probablemente."
+  }
+]
