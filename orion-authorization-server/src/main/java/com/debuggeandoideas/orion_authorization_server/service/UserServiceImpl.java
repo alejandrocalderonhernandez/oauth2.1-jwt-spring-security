@@ -12,6 +12,7 @@ import com.debuggeandoideas.orion_authorization_server.exception.UsernameAlready
 import com.debuggeandoideas.orion_authorization_server.repository.RoleRepository;
 import com.debuggeandoideas.orion_authorization_server.repository.UserRepository;
 import com.debuggeandoideas.orion_authorization_server.util.UserMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,10 +26,15 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
+    public UserServiceImpl(
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -38,7 +44,12 @@ public class UserServiceImpl implements UserService {
             throw new UsernameAlreadyExistsException(request.username());
         }
         String roleName = request.role() == null || request.role().isBlank() ? DEFAULT_ROLE : request.role();
-        UserEntity user = new UserEntity(request.username(), request.password(), findRole(roleName));
+
+        String psdHashedPassword
+                = this.passwordEncoder.encode(request.password());
+
+        UserEntity user = new UserEntity
+                (request.username(), psdHashedPassword, findRole(roleName));
         return UserMapper.toResponse(userRepository.save(user));
     }
 
@@ -70,7 +81,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updatePassword(Long id, UpdatePasswordRequest request) {
-        findUser(id).setPassword(request.newPassword());
+        findUser(id).setPassword(this.passwordEncoder.encode(request.newPassword()));
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.debuggeandoideas.orion_authorization_server.repository.UserRepository
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +18,15 @@ public class DataSeeder implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DataSeeder(RoleRepository roleRepository, UserRepository userRepository) {
+    public DataSeeder(
+            RoleRepository roleRepository,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -47,7 +53,8 @@ public class DataSeeder implements CommandLineRunner {
         if (userRepository.existsByUsername(username)) {
             return;
         }
-        UserEntity user = new UserEntity(username, password, role);
+        UserEntity user = new UserEntity(username, this.passwordEncoder.encode(password), role);
+        System.out.println("Password hashed: " + user.getPassword());
         user.setEnabled(enabled);
         userRepository.save(user);
     }
