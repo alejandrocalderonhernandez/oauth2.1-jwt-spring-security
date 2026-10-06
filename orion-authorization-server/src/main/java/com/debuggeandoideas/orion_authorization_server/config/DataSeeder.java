@@ -54,7 +54,6 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
         UserEntity user = new UserEntity(username, this.passwordEncoder.encode(password), role);
-        System.out.println("Password hashed: " + user.getPassword());
         user.setEnabled(enabled);
         userRepository.save(user);
     }
