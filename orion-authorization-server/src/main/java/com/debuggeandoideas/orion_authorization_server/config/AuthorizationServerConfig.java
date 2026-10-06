@@ -1,13 +1,20 @@
 package com.debuggeandoideas.orion_authorization_server.config;
 
-import jdk.jfr.Registered;
+
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.converter.RsaKeyConverters;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
@@ -22,6 +29,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.io.IOException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 
 @Configuration
@@ -39,6 +49,14 @@ public class AuthorizationServerConfig {
     @Value("${orion.client.scopes:mission.read,mission.write}")
     private List<String> scopes;
 
+    @Value("${orion.jwt.public-key:classpath:keys/public.pem}")
+    private Resource publicKeyResource;
+
+    @Value("${orion.jwt.private-key:classpath:keys/private.pem}")
+    private Resource privateKeyResource;
+
+    @Value("${orion.jwt.key-id:orion-key-1}")
+    private String keyId;
 
     @Bean(value = "authorizationServerFilterChain")
     @Order(1)
@@ -100,5 +118,17 @@ public class AuthorizationServerConfig {
         return source;
     }
 
+    JWKSource<SecurityContext> jwkSource() throws IOException {
+
+        RSAPublicKey publicKey = RsaKeyConverters.x509().convert(publicKeyResource.getInputStream());
+        RSAPrivateKey privateKey = RsaKeyConverters.pkcs8().convert(privateKeyResource.getInputStream());
+
+        RSAKey rsaKey = new RSAKey.Builder(publicKey)
+                .privateKey(privateKey)
+                .keyID(keyId)
+                .build();
+
+        return new ImmutableJWKSet<>(new JWKSet(rsaKey));
+    }
 
 }
