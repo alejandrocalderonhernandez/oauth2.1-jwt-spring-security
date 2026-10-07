@@ -25,7 +25,7 @@ public class RoleTokenConfig {
     }
 
     @Bean
-    OAuth2TokenCustomizer<JwtEncodingContext> oAuth2TokenCustomizer(RoleHierarchy roleHierarchy) {
+    OAuth2TokenCustomizer<JwtEncodingContext> oAuth2TokenCustomizer(RoleHierarchy roleHierarchy, RoleScopePolicy roleScopePolicy) {
         return context -> {
 
             if (!OAuth2TokenType.ACCESS_TOKEN.getValue().equals(context.getTokenType().getValue())) {
@@ -42,8 +42,8 @@ public class RoleTokenConfig {
                     .toList();
 
             context.getClaims().claim("roles", roles);
-         }
-        }
+            context.getClaims().claim("scope", roleScopePolicy.filter(context.getAuthorizedScopes(), roles));
+        };
     }
-
 }
+
