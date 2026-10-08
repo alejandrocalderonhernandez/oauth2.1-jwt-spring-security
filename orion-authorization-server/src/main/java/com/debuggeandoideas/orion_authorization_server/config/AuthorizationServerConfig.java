@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.converter.RsaKeyConverters;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
@@ -22,6 +23,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
@@ -32,7 +34,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.io.IOException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 
 @Configuration
 public class AuthorizationServerConfig {
@@ -57,6 +61,25 @@ public class AuthorizationServerConfig {
 
     @Value("${orion.jwt.key-id:orion-key-1}")
     private String keyId;
+
+    @Value("${orion.token.access.ttl-minutes:120}")
+    private int accessTokenTTLMinutes;
+
+    @Value("${orion.token.refresh.ttl-hours:8}")
+    private int refreshTokenTTLHours;
+
+    @Value("${orion.backend.client-id:orion-backend}")
+    private String backendClientId;
+
+    @Value("${orion.backend.client-secret:orion-secret}")
+    private String backendClientSecret;
+
+    @Value("${orion.backend.redirect-uri:https://oauth.pstmn.io/v1/callback}")
+    private String backendRedirectUri;
+
+    @Value("${orion.backend.id:orion-backend-id}")
+    private String orionBackendId;
+
 
     @Bean(value = "authorizationServerFilterChain")
     @Order(1)
@@ -85,9 +108,9 @@ public class AuthorizationServerConfig {
     }
 
     @Bean
-    RegisteredClientRepository registeredClientRepository() {
+    RegisteredClientRepository registeredClientRepository(PasswordEncoder passwordEncoder) {
 
-        RegisteredClient registeredClient = RegisteredClient.withId(clientId + "-id")
+        RegisteredClient orionFrontend = RegisteredClient.withId(clientId + "-id")
                 .clientId(clientId)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
@@ -97,9 +120,33 @@ public class AuthorizationServerConfig {
                         .requireProofKey(true)
                         .requireAuthorizationConsent(false)
                         .build())
+                .tokenSettings(TokenSettings.builder()
+                        .accessTokenTimeToLive(Duration.ofMinutes(accessTokenTTLMinutes))
+                        .refreshTokenTimeToLive(Duration.ofHours(refreshTokenTTLHours))
+                        .reuseRefreshTokens(false)
+                        .build())
                 .build();
 
-        return new InMemoryRegisteredClientRepository(registeredClient);
+        RegisteredClient orionBackend = RegisteredClient.withId(orionBackendId)
+                .clientId(backendClientId)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+                .clientSecret(Objects.requireNonNull(passwordEncoder.encode(backendClientSecret)))
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .redirectUri(backendRedirectUri)
+                .scopes(s -> s.addAll(scopes))
+                .clientSettings(ClientSettings.builder()
+                        .requireProofKey(false)
+                        .requireAuthorizationConsent(false)
+                        .build())
+                .tokenSettings(TokenSettings.builder()
+                        .accessTokenTimeToLive(Duration.ofMinutes(accessTokenTTLMinutes))
+                        .refreshTokenTimeToLive(Duration.ofHours(refreshTokenTTLHours))
+                        .reuseRefreshTokens(false)
+                        .build())
+                .build();
+
+        return new InMemoryRegisteredClientRepository(orionFrontend, orionBackend);
 
     }
 
@@ -118,6 +165,7 @@ public class AuthorizationServerConfig {
         return source;
     }
 
+    @Bean
     JWKSource<SecurityContext> jwkSource() throws IOException {
 
         RSAPublicKey publicKey = RsaKeyConverters.x509().convert(publicKeyResource.getInputStream());

@@ -26,7 +26,7 @@ public class JpaUserDetailsService implements UserDetailsService {
 
         return User.builder()
                 .username(userEntity.getUsername())
-                .password(userEntity.getUsername())
+                .password(userEntity.getPassword())
                 .authorities(userEntity.getRole().getName())
                 .disabled(!userEntity.isEnabled())
                 .accountLocked(!userEntity.isAccountNonLocked())

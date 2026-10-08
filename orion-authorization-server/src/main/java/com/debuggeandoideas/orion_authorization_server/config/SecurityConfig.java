@@ -17,11 +17,11 @@ public class SecurityConfig {
 
         http
             .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/users", "/users/**", "/h2-console/**").permitAll()
+                            .requestMatchers("/users", "/users/**", "/h2-console/**", "/login").permitAll()
                             .anyRequest().authenticated())
             .csrf(csrf -> csrf.ignoringRequestMatchers("/users/**", "/h2-console/**"))
             .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-            .formLogin(Customizer.withDefaults());
+            .formLogin(form -> form.loginPage("/login"));
 
         return http.build();
     }
