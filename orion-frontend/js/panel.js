@@ -7,7 +7,7 @@
 import { CONFIG, stepByStep } from './config.js';
 import { PHASES, getFlow, onFlowChange, resetFlow } from './flow.js';
 import { requests, onRequests } from './api.js';
-import { getTokens, refresh } from './oauth.js';
+import { getTokens } from './oauth.js';
 import { getSession } from './session.js';
 import { icon } from './icons.js';
 
@@ -51,13 +51,11 @@ function renderFlow() {
   }
 
   if (CONFIG.mode === 'secure') {
-    const t = getTokens();
     html += `<div class="controls">
       <label class="switch"><input type="checkbox" id="stepSwitch" ${stepByStep.enabled ? 'checked' : ''}>
         <span>Modo paso a paso</span></label>
       <div class="ctl-row">
         <button class="btn small ghost" data-act="reset">${icon('refresh-cw', 14)} Reiniciar bitácora</button>
-        ${t?.refresh_token ? `<button class="btn small" data-act="refresh">${icon('key-round', 14)} Renovar token (fase 7)</button>` : ''}
       </div></div>`;
   }
 
@@ -126,7 +124,6 @@ function renderToken() {
       <dt>token_type</dt><dd>${esc(t.token_type)}</dd>
       <dt>scopes concedidos</dt><dd>${t.scope ? t.scope.split(/\s+/).map((s) => `<span class="chip">${esc(s)}</span>`).join(' ') : '—'}</dd>
       <dt>caduca en</dt><dd><b id="countdown" data-exp="${exp}"></b></dd>
-      <dt>refresh token</dt><dd>${t.refresh_token ? 'sí (llave de repuesto guardada)' : 'no'}</dd>
     </dl>
     <h5>Access token por dentro</h5>
     ${
@@ -180,13 +177,6 @@ export function initPanel() {
     }
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'reset') resetFlow();
-    if (act === 'refresh') {
-      try {
-        await refresh();
-      } catch {
-        /* el error queda en la bitácora de la fase 7 */
-      }
-    }
   });
   body.addEventListener('change', (e) => {
     if (e.target.id === 'stepSwitch') stepByStep.enabled = e.target.checked;

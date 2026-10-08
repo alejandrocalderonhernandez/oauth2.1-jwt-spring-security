@@ -1,11 +1,10 @@
 // ─────────────────────────────────────────────────────────────
 //  Cliente de la API. Todas las llamadas pasan por aquí para:
 //   • agregar el header Authorization: Bearer <token> (fase 6)
-//   • renovar el token si caducó (fase 7)
 //   • guardar un historial que se muestra en el panel "Peticiones"
 // ─────────────────────────────────────────────────────────────
 import { CONFIG } from './config.js';
-import { getTokens, refresh } from './oauth.js';
+import { getTokens, logout } from './oauth.js';
 import { mockServer, getMockRole } from './mock.js';
 import { setPhase, short } from './flow.js';
 
@@ -96,26 +95,10 @@ async function once(method, path, body, withToken) {
 }
 
 export async function api(method, path, { body, withToken = true } = {}) {
-  // Si el access token ya caducó y hay refresh token, renovamos antes de llamar.
   const t = getTokens();
-  if (withToken && CONFIG.mode === 'secure' && t?.refresh_token && t.expires_at < Date.now() + 2000) {
-    try {
-      await refresh();
-    } catch {
-      /* la sesión se cierra sola; seguimos sin token */
-    }
+  if (withToken && CONFIG.mode === 'secure' && t && t.expires_at < Date.now() + 2000) {
+    logout(false);
   }
 
-  let result = await once(method, path, body, withToken);
-
-  // Si el servidor dice 401 pero tenemos refresh token, un intento de renovación.
-  if (result.status === 401 && withToken && CONFIG.mode === 'secure' && getTokens()?.refresh_token) {
-    try {
-      await refresh();
-      result = await once(method, path, body, withToken);
-    } catch {
-      /* se mostrará el 401 */
-    }
-  }
-  return result;
+  return once(method, path, body, withToken);
 }
