@@ -31,13 +31,11 @@ const readJson = (key) => {
 
 export const getTokens = () => readJson(K_TOKENS);
 
-function storeTokens(data, previous) {
+function storeTokens(data) {
   const tokens = {
     access_token: data.access_token,
-    // Si el servidor no manda un refresh token nuevo, conservamos el anterior.
-    refresh_token: data.refresh_token || previous?.refresh_token || null,
     token_type: data.token_type || 'Bearer',
-    scope: data.scope || previous?.scope || '',
+    scope: data.scope || '',
     expires_at: Date.now() + (Number(data.expires_in) || 300) * 1000,
   };
   sessionStorage.setItem(K_TOKENS, JSON.stringify(tokens));
@@ -234,56 +232,12 @@ export async function handleCallback() {
       ['→ expires_in', `${data.expires_in} s`],
       ['→ scope concedido', data.scope || '—'],
       ['→ access_token', short(data.access_token, 10)],
-      ['→ refresh_token', data.refresh_token ? short(data.refresh_token, 10) : 'no entregado'],
     ]);
     return { ok: true };
   } catch (err) {
     setPhase(5, 'error', [...rows5, ['Error', err.message]]);
     return { error: err.message };
   }
-}
-
-// ── Fase 7 · Renovar con el refresh token ───────────────────
-
-let refreshing = null;
-
-export function refresh() {
-  if (refreshing) return refreshing; // evita renovar dos veces a la vez
-  refreshing = (async () => {
-    const prev = getTokens();
-    const meta = readJson(K_META);
-    if (!prev?.refresh_token || !meta) throw new Error('No hay refresh token disponible.');
-    const rows = [
-      ['POST', meta.token_endpoint],
-      ['grant_type', 'refresh_token'],
-      ['refresh_token', short(prev.refresh_token, 8)],
-    ];
-    setPhase(7, 'active', rows);
-    try {
-      const data = await postToken(meta.token_endpoint, {
-        grant_type: 'refresh_token',
-        refresh_token: prev.refresh_token,
-        client_id: CONFIG.clientId,
-      });
-      const next = storeTokens(data, prev);
-      setPhase(7, 'done', [
-        ...rows,
-        ['→ nuevo access_token', short(next.access_token, 10)],
-        [
-          '→ refresh token',
-          data.refresh_token && data.refresh_token !== prev.refresh_token
-            ? 'rotado: el anterior ya no sirve'
-            : 'sin cambios',
-        ],
-      ]);
-      return next;
-    } catch (err) {
-      setPhase(7, 'error', [...rows, ['Error', err.message]]);
-      logout(false); // si no se puede renovar, hay que iniciar sesión otra vez
-      throw err;
-    }
-  })().finally(() => (refreshing = null));
-  return refreshing;
 }
 
 // ── Utilidades ──────────────────────────────────────────────
