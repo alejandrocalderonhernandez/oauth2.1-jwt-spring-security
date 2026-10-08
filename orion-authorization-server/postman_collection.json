@@ -1,7 +1,8 @@
 {
   "info": {
     "name": "Orion - Authorization Server",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección del curso OAuth 2.1 con Spring. Todo viene configurado en las variables de la colección: no necesitas crear un entorno. Para otro usuario cambia login_username y login_password (admin1234, manager1234, user1234)."
   },
   "auth": {
     "type": "noauth"
@@ -352,6 +353,976 @@
           }
         }
       ]
+    },
+    {
+      "name": "CORS",
+      "item": [
+        {
+          "name": "Preflight token (allowed origin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Preflight accepted\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Allow-Origin matches frontend\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Origin\")).to.eql(pm.collectionVariables.get(\"frontendOrigin\"));",
+                  "});",
+                  "pm.test(\"Allowed methods include POST\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Methods\")).to.include(\"POST\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "OPTIONS",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{frontendOrigin}}"
+              },
+              {
+                "key": "Access-Control-Request-Method",
+                "value": "POST"
+              },
+              {
+                "key": "Access-Control-Request-Headers",
+                "value": "Content-Type"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/oauth2/token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Preflight token (disallowed origin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Preflight rejected\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "pm.test(\"No Allow-Origin header\", function () {",
+                  "    pm.expect(pm.response.headers.has(\"Access-Control-Allow-Origin\")).to.be.false;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "OPTIONS",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{disallowedOrigin}}"
+              },
+              {
+                "key": "Access-Control-Request-Method",
+                "value": "POST"
+              },
+              {
+                "key": "Access-Control-Request-Headers",
+                "value": "Content-Type"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/oauth2/token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Preflight token (disallowed header)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Preflight rejected\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "OPTIONS",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{frontendOrigin}}"
+              },
+              {
+                "key": "Access-Control-Request-Method",
+                "value": "POST"
+              },
+              {
+                "key": "Access-Control-Request-Headers",
+                "value": "X-Custom-Header"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/oauth2/token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            }
+          }
+        },
+        {
+          "name": "OpenID configuration (allowed origin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Allow-Origin matches frontend\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Origin\")).to.eql(pm.collectionVariables.get(\"frontendOrigin\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{frontendOrigin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/.well-known/openid-configuration",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ".well-known",
+                "openid-configuration"
+              ]
+            }
+          }
+        },
+        {
+          "name": "JWKS (allowed origin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Allow-Origin matches frontend\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Origin\")).to.eql(pm.collectionVariables.get(\"frontendOrigin\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{frontendOrigin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/oauth2/jwks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "oauth2",
+                "jwks"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authorization Server",
+      "description": "Ejecuta la carpeta completa con Run folder, o envía los pasos 1 a 5 en orden. El paso 5 devuelve el JWT.",
+      "item": [
+        {
+          "name": "1. Iniciar autorización",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 302', () => pm.expect(pm.response.code).to.eql(302));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "text/html"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_url}}/oauth2/authorize?response_type=code&client_id={{client_id}}&redirect_uri={{redirect_uri}}&scope=mission.read%20mission.write&code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM&code_challenge_method=S256&state=postman",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "oauth2",
+                "authorize"
+              ],
+              "query": [
+                {
+                  "key": "response_type",
+                  "value": "code"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{client_id}}"
+                },
+                {
+                  "key": "redirect_uri",
+                  "value": "{{redirect_uri}}"
+                },
+                {
+                  "key": "scope",
+                  "value": "mission.read%20mission.write"
+                },
+                {
+                  "key": "code_challenge",
+                  "value": "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM"
+                },
+                {
+                  "key": "code_challenge_method",
+                  "value": "S256"
+                },
+                {
+                  "key": "state",
+                  "value": "postman"
+                }
+              ]
+            },
+            "description": "Arranca el flujo Authorization Code + PKCE. El servidor responde 302 (hacia /login, o directo con el code si ya había sesión)."
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "2. Formulario de login (csrf)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const html = pm.response.text();",
+                  "const m = html.match(/name=\"_csrf\"[^>]*value=\"([^\"]+)\"/) || html.match(/value=\"([^\"]+)\"[^>]*name=\"_csrf\"/);",
+                  "pm.test('Se encontró el token _csrf', () => pm.expect(m).to.not.be.null);",
+                  "if (m) pm.collectionVariables.set('csrf_token', m[1]);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{auth_url}}/login",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Lee el formulario de login y guarda el token _csrf en la variable csrf_token."
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "3. Enviar credenciales",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const loc = pm.response.headers.get('Location') || '(sin Location)';",
+                  "console.log('Paso 3 · status:', pm.response.code, '· Location:', loc);",
+                  "pm.test('Login aceptado · Location: ' + loc, () => {",
+                  "  pm.expect(pm.response.code, 'status').to.eql(302);",
+                  "  pm.expect(loc, 'Volvió a /login (credenciales o csrf incorrectos)').to.not.include('/login');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{auth_url}}/login",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Inicia sesión con login_username y login_password (cámbialos para probar otro usuario: admin, manager o user).",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{login_username}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{login_password}}",
+                  "type": "text"
+                },
+                {
+                  "key": "_csrf",
+                  "value": "{{csrf_token}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "4. Obtener code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const loc = pm.response.headers.get('Location') || '';",
+                  "console.log('Paso 4 · status:', pm.response.code, '· Location:', loc || '(sin Location)');",
+                  "const m = loc.match(/[?&]code=([^&]+)/);",
+                  "const why = !loc ? 'sin header Location (¿redirecciones activadas?)' : loc.includes('/login') ? 'el servidor pide login: la sesión del paso 3 no quedó iniciada' : 'Location inesperado';",
+                  "pm.test(m ? 'Llegó un authorization code' : 'Sin code · ' + why + ' · Location: ' + loc, () => pm.expect(m).to.not.be.null);",
+                  "if (m) pm.collectionVariables.set('auth_code', decodeURIComponent(m[1]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{auth_url}}/oauth2/authorize?response_type=code&client_id={{client_id}}&redirect_uri={{redirect_uri}}&scope=mission.read%20mission.write&code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM&code_challenge_method=S256&state=postman",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "oauth2",
+                "authorize"
+              ],
+              "query": [
+                {
+                  "key": "response_type",
+                  "value": "code"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{client_id}}"
+                },
+                {
+                  "key": "redirect_uri",
+                  "value": "{{redirect_uri}}"
+                },
+                {
+                  "key": "scope",
+                  "value": "mission.read%20mission.write"
+                },
+                {
+                  "key": "code_challenge",
+                  "value": "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM"
+                },
+                {
+                  "key": "code_challenge_method",
+                  "value": "S256"
+                },
+                {
+                  "key": "state",
+                  "value": "postman"
+                }
+              ]
+            },
+            "description": "Con la sesión iniciada, el servidor responde 302 hacia redirect_uri?code=... Postman no sigue la redirección; el script guarda el code en auth_code."
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "5. Canjear code por JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Token emitido', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  const b = pm.response.json();",
+                  "  pm.collectionVariables.set('access_token', b.access_token);",
+                  "  const payload = JSON.parse(Buffer.from(b.access_token.split('.')[1], 'base64').toString());",
+                  "  console.log('JWT payload:', payload);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_url}}/oauth2/token",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            },
+            "description": "Cambia el code por el access_token (PKCE con code_verifier). Lo guarda en la variable access_token y muestra el payload del JWT en la consola de Postman. Un cliente público no recibe refresh_token.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "authorization_code",
+                  "type": "text"
+                },
+                {
+                  "key": "code",
+                  "value": "{{auth_code}}",
+                  "type": "text"
+                },
+                {
+                  "key": "redirect_uri",
+                  "value": "{{redirect_uri}}",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{client_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "code_verifier",
+                  "value": "{{code_verifier}}",
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth Server Privado (refresh token)",
+      "description": "Cliente confidencial orion-backend: usa client_secret y SÍ recibe refresh token. Ejecuta la carpeta completa con Run folder, o envía P1 a P7 en orden. Carpeta independiente de Authorization Server (cliente público orion-frontend).",
+      "item": [
+        {
+          "name": "P1. Iniciar autorización",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 302', () => pm.expect(pm.response.code).to.eql(302));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "text/html"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_url}}/oauth2/authorize?response_type=code&client_id={{cc_client_id}}&redirect_uri={{cc_redirect_uri}}&scope=mission.read%20mission.write&state=postman",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "oauth2",
+                "authorize"
+              ],
+              "query": [
+                {
+                  "key": "response_type",
+                  "value": "code"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{cc_client_id}}"
+                },
+                {
+                  "key": "redirect_uri",
+                  "value": "{{cc_redirect_uri}}"
+                },
+                {
+                  "key": "scope",
+                  "value": "mission.read%20mission.write"
+                },
+                {
+                  "key": "state",
+                  "value": "postman"
+                }
+              ]
+            },
+            "description": "Cliente confidencial orion-backend, flujo clásico de OAuth 2.0 con secreto (sin PKCE). El servidor responde 302 hacia /login, o directo con el code si ya había sesión."
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "P2. Formulario de login (csrf)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const html = pm.response.text();",
+                  "const m = html.match(/name=\"_csrf\"[^>]*value=\"([^\"]+)\"/) || html.match(/value=\"([^\"]+)\"[^>]*name=\"_csrf\"/);",
+                  "pm.test('Se encontró el token _csrf', () => pm.expect(m).to.not.be.null);",
+                  "if (m) pm.collectionVariables.set('csrf_token', m[1]);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{auth_url}}/login",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Lee el formulario de login y guarda el token _csrf en csrf_token."
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "P3. Enviar credenciales",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const loc = pm.response.headers.get('Location') || '(sin Location)';",
+                  "pm.test('Login aceptado · Location: ' + loc, () => {",
+                  "  pm.expect(pm.response.code, 'status').to.eql(302);",
+                  "  pm.expect(loc, 'Volvió a /login (credenciales o csrf incorrectos)').to.not.include('/login');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{auth_url}}/login",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Inicia sesión con login_username y login_password.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{login_username}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{login_password}}",
+                  "type": "text"
+                },
+                {
+                  "key": "_csrf",
+                  "value": "{{csrf_token}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "P4. Obtener code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const loc = pm.response.headers.get('Location') || '';",
+                  "console.log('P4 · status:', pm.response.code, '· Location:', loc || '(sin Location)');",
+                  "const m = loc.match(/[?&]code=([^&]+)/);",
+                  "const why = !loc ? 'sin header Location (¿redirecciones activadas?)' : loc.includes('/login') ? 'el servidor pide login: la sesión del paso P3 no quedó iniciada' : 'Location inesperado';",
+                  "pm.test(m ? 'Llegó un authorization code' : 'Sin code · ' + why + ' · Location: ' + loc, () => pm.expect(m).to.not.be.null);",
+                  "if (m) pm.collectionVariables.set('cc_auth_code', decodeURIComponent(m[1]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "text/html"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_url}}/oauth2/authorize?response_type=code&client_id={{cc_client_id}}&redirect_uri={{cc_redirect_uri}}&scope=mission.read%20mission.write&state=postman",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "oauth2",
+                "authorize"
+              ],
+              "query": [
+                {
+                  "key": "response_type",
+                  "value": "code"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{cc_client_id}}"
+                },
+                {
+                  "key": "redirect_uri",
+                  "value": "{{cc_redirect_uri}}"
+                },
+                {
+                  "key": "scope",
+                  "value": "mission.read%20mission.write"
+                },
+                {
+                  "key": "state",
+                  "value": "postman"
+                }
+              ]
+            },
+            "description": "Con la sesión iniciada, el servidor responde 302 hacia cc_redirect_uri?code=... Postman no sigue la redirección; el script guarda el code en cc_auth_code."
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "P5. Canjear code por access + refresh token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Token emitido', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  const b = pm.response.json();",
+                  "  pm.test('Trae refresh_token', () => pm.expect(b.refresh_token).to.be.a('string'));",
+                  "  pm.collectionVariables.set('cc_access_token', b.access_token);",
+                  "  pm.collectionVariables.set('cc_refresh_token', b.refresh_token);",
+                  "  const payload = JSON.parse(Buffer.from(b.access_token.split('.')[1], 'base64').toString());",
+                  "  console.log('JWT payload:', payload);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_url}}/oauth2/token",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            },
+            "description": "Cambia el code por tokens enviando client_id y client_secret. Al ser un cliente confidencial, la respuesta SÍ trae refresh_token.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "authorization_code",
+                  "type": "text"
+                },
+                {
+                  "key": "code",
+                  "value": "{{cc_auth_code}}",
+                  "type": "text"
+                },
+                {
+                  "key": "redirect_uri",
+                  "value": "{{cc_redirect_uri}}",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{cc_client_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "client_secret",
+                  "value": "{{cc_client_secret}}",
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "P6. Renovar con refresh_token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Token renovado', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  const b = pm.response.json();",
+                  "  pm.collectionVariables.set('cc_old_refresh_token', pm.collectionVariables.get('cc_refresh_token'));",
+                  "  pm.collectionVariables.set('cc_access_token', b.access_token);",
+                  "  pm.collectionVariables.set('cc_refresh_token', b.refresh_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_url}}/oauth2/token",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            },
+            "description": "Canjea el refresh_token guardado por un access_token nuevo. El refresh_token rota: el anterior deja de servir y el nuevo se guarda solo.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "refresh_token",
+                  "type": "text"
+                },
+                {
+                  "key": "refresh_token",
+                  "value": "{{cc_refresh_token}}",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{cc_client_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "client_secret",
+                  "value": "{{cc_client_secret}}",
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "P7. Reusar refresh viejo (debe fallar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Refresh reutilizado es rechazado', () => pm.response.to.have.status(400));",
+                  "pm.test('Error invalid_grant', () => pm.expect(pm.response.json().error).to.eql('invalid_grant'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_url}}/oauth2/token",
+              "host": [
+                "{{auth_url}}"
+              ],
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            },
+            "description": "Intenta usar el refresh_token anterior (guardado por P6). Debe responder 400 invalid_grant: demuestra la rotación.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "refresh_token",
+                  "type": "text"
+                },
+                {
+                  "key": "refresh_token",
+                  "value": "{{cc_old_refresh_token}}",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{cc_client_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "client_secret",
+                  "value": "{{cc_client_secret}}",
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [
@@ -368,6 +1339,101 @@
     {
       "key": "username",
       "value": "user",
+      "type": "string"
+    },
+    {
+      "key": "frontendOrigin",
+      "value": "http://localhost:5173",
+      "type": "string"
+    },
+    {
+      "key": "disallowedOrigin",
+      "value": "http://evil.example.com",
+      "type": "string"
+    },
+    {
+      "key": "auth_url",
+      "value": "http://localhost:9000",
+      "type": "string"
+    },
+    {
+      "key": "client_id",
+      "value": "orion-frontend",
+      "type": "string"
+    },
+    {
+      "key": "redirect_uri",
+      "value": "http://localhost:5173/",
+      "type": "string"
+    },
+    {
+      "key": "scopes",
+      "value": "mission.read mission.write",
+      "type": "string"
+    },
+    {
+      "key": "code_verifier",
+      "value": "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+      "type": "string"
+    },
+    {
+      "key": "login_username",
+      "value": "admin",
+      "type": "string"
+    },
+    {
+      "key": "login_password",
+      "value": "admin1234",
+      "type": "string"
+    },
+    {
+      "key": "csrf_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_code",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cc_client_id",
+      "value": "orion-backend",
+      "type": "string"
+    },
+    {
+      "key": "cc_client_secret",
+      "value": "orion-secret",
+      "type": "string"
+    },
+    {
+      "key": "cc_redirect_uri",
+      "value": "https://oauth.pstmn.io/v1/callback",
+      "type": "string"
+    },
+    {
+      "key": "cc_auth_code",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cc_access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cc_refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cc_old_refresh_token",
+      "value": "",
       "type": "string"
     }
   ]
