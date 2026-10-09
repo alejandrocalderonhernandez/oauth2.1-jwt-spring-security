@@ -1,5 +1,6 @@
 package com.debuggeandoideas.orion_authorization_server.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -13,6 +14,9 @@ import java.util.List;
 
 @Configuration
 public class RoleTokenConfig {
+
+    @Value("${orion.resource.audience:orion-resource-server}")
+    private String resourceAudience;
 
     private static final String ROLES_HIERARCHY = """
             ROLE_ADMIN > ROLE_MANAGER
@@ -43,6 +47,9 @@ public class RoleTokenConfig {
 
             context.getClaims().claim("roles", roles);
             context.getClaims().claim("scope", roleScopePolicy.filter(context.getAuthorizedScopes(), roles));
+            context.getClaims().audience(List.of(
+                    context.getRegisteredClient().getClientId(), resourceAudience
+            ));
         };
     }
 }
