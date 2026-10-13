@@ -106,6 +106,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public void lockByUsername(String username) {
+        userRepository.findByUsername(username)
+                .ifPresent(user -> setAccountNonLocked(user.getId(), false));
+    }
+
+    @Override
+    @Transactional
     public void setAccountNonExpired(Long id, boolean accountNonExpired) {
         findUser(id).setAccountNonExpired(accountNonExpired);
     }

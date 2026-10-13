@@ -27,6 +27,8 @@ public interface UserService {
 
     void setAccountNonLocked(Long id, boolean accountNonLocked);
 
+    void lockByUsername(String username);
+
     void setAccountNonExpired(Long id, boolean accountNonExpired);
 
     void setCredentialsNonExpired(Long id, boolean credentialsNonExpired);
