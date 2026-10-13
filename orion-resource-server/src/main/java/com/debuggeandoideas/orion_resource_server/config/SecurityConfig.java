@@ -1,8 +1,10 @@
 package com.debuggeandoideas.orion_resource_server.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authorization.AuthorityAuthorizationManager;
@@ -18,11 +20,14 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,9 +56,16 @@ public class SecurityConfig {
     private static final String ROLE_MANAGER = "MANAGER";
     private static final String ROLE_USER = "USER";
 
+    private static final String PROBLEM_JSON = "application/problem+json";
+    private static final String PROBLEM_BODY = "{\"title\":\"%s\",\"status\":%d,\"detail\":\"%s\"}";
+    private static final String DETAIL_UNAUTHORIZED = "A valid access token is required";
+    private static final String DETAIL_FORBIDDEN = "The token does not grant access to this resource";
+    private static final String BEARER = "Bearer";
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                            AuthenticationEntryPoint authenticationEntryPoint,
+                                            AccessDeniedHandler accessDeniedHandler) throws Exception {
         http
                 .authorizeHttpRequests(auth ->
                                 auth
@@ -75,10 +87,15 @@ public class SecurityConfig {
                 // Never create JSESSIONID
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
-                .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()))
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(
-                        HttpStatus.UNAUTHORIZED
-                )));
+                .cors(Customizer.withDefaults())
+                .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults())
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                );
 
         return http.build();
     }
@@ -124,5 +141,26 @@ public class SecurityConfig {
         DefaultBearerTokenResolver defaultBearerTokenResolver =  new DefaultBearerTokenResolver();
         RequestMatcher publicRoute = PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, API_NEWS);
         return req -> publicRoute.matches(req) ? null : defaultBearerTokenResolver.resolve(req);
+    }
+
+    @Bean
+    AuthenticationEntryPoint authenticationEntryPoint() {
+        return (req, res, ex) -> {
+          res.setHeader(HttpHeaders.WWW_AUTHENTICATE, BEARER);
+          this.writeProblem(res, HttpStatus.UNAUTHORIZED, DETAIL_UNAUTHORIZED);
+        };
+    }
+
+    @Bean
+    AccessDeniedHandler accessDeniedHandler() {
+        return (req, res, ex) ->
+                this.writeProblem(res, HttpStatus.FORBIDDEN, DETAIL_FORBIDDEN);
+    }
+
+
+    private void writeProblem(HttpServletResponse response, HttpStatus status, String detail) throws IOException {
+        response.setStatus(status.value());
+        response.setContentType(PROBLEM_JSON);
+        response.getWriter().write(PROBLEM_BODY.formatted(status.getReasonPhrase(), status.value(), detail));
     }
 }
