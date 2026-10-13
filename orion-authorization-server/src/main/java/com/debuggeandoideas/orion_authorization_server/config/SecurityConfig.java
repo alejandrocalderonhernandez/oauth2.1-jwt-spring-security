@@ -11,14 +11,14 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean(value = "baseFilterChain")
-    @Order(2)
+    @Order(3)
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
             .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/users", "/users/**", "/h2-console/**", "/login").permitAll()
+                            .requestMatchers("/h2-console/**", "/login").permitAll()
                             .anyRequest().authenticated())
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/users/**", "/h2-console/**"))
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
             .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
             .formLogin(form -> form.loginPage("/login"));
 
