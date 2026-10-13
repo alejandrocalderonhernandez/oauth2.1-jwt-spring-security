@@ -9,9 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
@@ -21,11 +22,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest({NewsController.class, MissionController.class})
-@Import(WebConfig.class)
+@Import({WebConfig.class, SecurityConfig.class})
 class CorsTest {
 
     private static final String FRONTEND_ORIGIN = "http://localhost:5173";
-
+    private static final String SCOPE_MISSION_READ = "SCOPE_mission.read";
+    private static final String ROLE_USER = "ROLE_USER";
     @Autowired
     private MockMvc mockMvc;
 
@@ -49,7 +51,12 @@ class CorsTest {
     void getFromTheFrontendIncludesTheAllowOriginHeader() throws Exception {
         when(missionService.findAll()).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/missions").header(HttpHeaders.ORIGIN, FRONTEND_ORIGIN))
+        mockMvc.perform(get("/api/missions").header(HttpHeaders.ORIGIN, FRONTEND_ORIGIN)
+                        .with(jwt().authorities(
+                                new SimpleGrantedAuthority(SCOPE_MISSION_READ),
+                                new SimpleGrantedAuthority(ROLE_USER)
+                        ))
+                )
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, FRONTEND_ORIGIN));
     }

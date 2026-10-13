@@ -1,5 +1,6 @@
 package com.debuggeandoideas.orion_resource_server.controller;
 
+import com.debuggeandoideas.orion_resource_server.config.SecurityConfig;
 import com.debuggeandoideas.orion_resource_server.config.WebConfig;
 import com.debuggeandoideas.orion_resource_server.dto.NewsResponse;
 import com.debuggeandoideas.orion_resource_server.service.NewsService;
@@ -18,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(NewsController.class)
-@Import(WebConfig.class)
+@Import({WebConfig.class, SecurityConfig.class})
 class NewsControllerTest {
 
     @Autowired

@@ -27,21 +27,21 @@ Contenido:
 
 1. Constantes (nada de strings sueltos): rutas del CRUD, rol `AUTH_ADMIN`, y el orden del chain.
 2. Dos propiedades con `@Value` a nivel de clase y con valor por defecto, sin tocar `application.yml`:
-   - `@Value("${orion.admin.username:AuthAdmin}")`
-   - `@Value("${orion.admin.password:secret1234}")`
+    - `@Value("${orion.admin.username:AuthAdmin}")`
+    - `@Value("${orion.admin.password:secret1234}")`
 3. Un `@Bean SecurityFilterChain basicAuthFilterChain(HttpSecurity http, PasswordEncoder passwordEncoder)` con:
-   - `@Order` **entre** el chain OAuth (`@Order(1)`) y el chain del login. Si el del login no tiene `@Order`, ponle el valor más bajo posible solo si es indispensable y avísame.
-   - `http.securityMatcher(...)` con las rutas del CRUD de usuarios (todas, incluida la de bloquear).
-   - `authorizeHttpRequests(auth -> auth.anyRequest().hasRole(ROL))`
-   - `httpBasic(Customizer.withDefaults())`
-   - `sessionManagement` en `SessionCreationPolicy.STATELESS`
-   - `csrf(AbstractHttpConfigurer::disable)`
-   - `http.authenticationManager(...)` con un `ProviderManager` propio (ver siguiente punto).
+    - `@Order` **entre** el chain OAuth (`@Order(1)`) y el chain del login. Si el del login no tiene `@Order`, ponle el valor más bajo posible solo si es indispensable y avísame.
+    - `http.securityMatcher(...)` con las rutas del CRUD de usuarios (todas, incluida la de bloquear).
+    - `authorizeHttpRequests(auth -> auth.anyRequest().hasRole(ROL))`
+    - `httpBasic(Customizer.withDefaults())`
+    - `sessionManagement` en `SessionCreationPolicy.STATELESS`
+    - `csrf(AbstractHttpConfigurer::disable)`
+    - `http.authenticationManager(...)` con un `ProviderManager` propio (ver siguiente punto).
 4. El usuario en memoria y su `AuthenticationManager` **dentro del método del chain**, como variables locales (NO como `@Bean`):
-   - `UserDetails` con `User.withUsername(username).password(passwordEncoder.encode(password)).roles(ROL).build()`
-   - `InMemoryUserDetailsManager` con ese usuario
-   - `DaoAuthenticationProvider` con ese manager y el `PasswordEncoder` existente
-   - `new ProviderManager(provider)`
+    - `UserDetails` con `User.withUsername(username).password(passwordEncoder.encode(password)).roles(ROL).build()`
+    - `InMemoryUserDetailsManager` con ese usuario
+    - `DaoAuthenticationProvider` con ese manager y el `PasswordEncoder` existente
+    - `new ProviderManager(provider)`
 
 ## Imports exactos
 
@@ -81,6 +81,9 @@ Nota: según la versión de Spring Security del proyecto, `DaoAuthenticationProv
 - NO añadir `application.yml`. Los valores van con `@Value` y defaults.
 - NO tocar el `LoginAttemptListener` (bloqueo por intentos). `AuthAdmin` no está en la BD, así que el listener no lo afecta.
 
+## Comentarios
+
+Cada línea, método y propiedad nuevos llevan un comentario con la palabra **NEW** y su número: `// NEW_BASIC-1`, `// NEW_BASIC-2`, etc.
 
 ## Prueba en Postman (Authorization → Basic Auth)
 

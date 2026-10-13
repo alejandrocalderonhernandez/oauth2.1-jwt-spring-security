@@ -1,5 +1,6 @@
 package com.debuggeandoideas.orion_resource_server.controller;
 
+import com.debuggeandoideas.orion_resource_server.config.SecurityConfig;
 import com.debuggeandoideas.orion_resource_server.config.WebConfig;
 import com.debuggeandoideas.orion_resource_server.dto.CreatedMissionResponse;
 import com.debuggeandoideas.orion_resource_server.dto.CrewMemberResponse;
@@ -11,12 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.List;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,8 +29,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(MissionController.class)
-@Import(WebConfig.class)
+@Import({WebConfig.class, SecurityConfig.class})
 class MissionControllerTest {
+
+    private static final String ROLE_MANAGER = "ROLE_MANAGER";
+    private static final String ROLE_USER = "ROLE_USER";
+    private static final String SCOPE_MISSION_READ = "SCOPE_mission.read";
+    private static final String SCOPE_MISSION_WRITE = "SCOPE_mission.write";
+    private static final String API_MISSIONS = "/api/missions";
+
 
     private static final String CREATED_MESSAGE =
             "Misión recibida por el centro de control. Un comité muy serio la revisará (mañana, quizá).";
@@ -49,7 +60,7 @@ class MissionControllerTest {
                 "M-001", "Luna Roja", "Fobos", "ACTIVA", "ULTRA SECRETO", "2087-03-03", "Resumen",
                 List.of(new CrewMemberResponse("Ana Pérez", "Navegación")), List.of("Hallazgo"), "Nota")));
 
-        mockMvc.perform(get("/api/missions"))
+        mockMvc.perform(get(API_MISSIONS).with(userToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].id").value("M-001"))
@@ -63,7 +74,7 @@ class MissionControllerTest {
 
     @Test
     void createReturnsCreatedWithTheFixedBody() throws Exception {
-        ResultActions result = mockMvc.perform(post("/api/missions")
+        ResultActions result = mockMvc.perform(post(API_MISSIONS).with(managerToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"Aurora Verde\",\"destination\":\"Marte\",\"objective\":\"Explorar\"}"));
 
@@ -72,7 +83,7 @@ class MissionControllerTest {
 
     @Test
     void createReturnsCreatedWithAnEmptyBody() throws Exception {
-        ResultActions result = mockMvc.perform(post("/api/missions")
+        ResultActions result = mockMvc.perform(post(API_MISSIONS).with(managerToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(""));
 
@@ -81,7 +92,21 @@ class MissionControllerTest {
 
     @Test
     void createReturnsCreatedWithoutAnyBody() throws Exception {
-        expectFixedCreatedBody(mockMvc.perform(post("/api/missions")));
+        expectFixedCreatedBody(mockMvc.perform(post(API_MISSIONS).with(managerToken())));
+    }
+
+    private RequestPostProcessor userToken() {
+        return jwt().authorities(
+                new SimpleGrantedAuthority(SCOPE_MISSION_READ),
+                new SimpleGrantedAuthority(ROLE_USER)
+        );
+    }
+
+    private RequestPostProcessor managerToken() {
+        return jwt().authorities(
+                new SimpleGrantedAuthority(SCOPE_MISSION_WRITE),
+                new SimpleGrantedAuthority(ROLE_MANAGER)
+        );
     }
 
     private void expectFixedCreatedBody(ResultActions result) throws Exception {
