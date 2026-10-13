@@ -19,6 +19,7 @@ public class NewsController {
     }
 
     @GetMapping
+    //@PreAuthorize("hasAuthority('SCOPE_mission.read')")
     public List<NewsResponse> findAll() {
         return newsService.findAll();
     }
